@@ -10,10 +10,19 @@ from models import Message
 from tools import tools, serpapi_search
 from dotenv import load_dotenv
 import os
+from contextlib import asynccontextmanager
 
 load_dotenv()
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    SQLModel.metadata.create_all(engine)
+    print("Database connected and tables created.")
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 CHAT_HISTORY_NUMBER_LIMIT = os.getenv("CHAT_HISTORY_NUMBER_LIMIT")
 
@@ -25,13 +34,6 @@ class ChatRequest(BaseModel):
     user_prompt: str
     model_name: str = "gpt-4o"
     api_key: str
-
-
-# ----------- DB init ----------- #
-@app.on_event("startup")
-def on_startup():
-    SQLModel.metadata.create_all(engine)
-    print("Database connected and tables created.")
 
 
 # @app.get("/search")
