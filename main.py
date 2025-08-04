@@ -51,11 +51,9 @@ def chat(req: ChatRequest, db: Session = Depends(get_session)):
 
     messages = []
 
-    if not history:
-        messages.append({"role": "system", "content": req.system_prompt})
-    else:
-        for msg in history:
-            messages.append({"role": msg.role, "content": msg.content})
+    messages.append({"role": "system", "content": req.system_prompt})
+    for msg in history:
+        messages.append({"role": msg.role, "content": msg.content})
 
     messages.append({"role": "user", "content": req.user_prompt})
 
